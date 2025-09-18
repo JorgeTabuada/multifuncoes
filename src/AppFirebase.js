@@ -4,9 +4,12 @@ import { FirebaseLoginPage } from './components/auth/FirebaseAuth';
 import ReservasFirebaseSubAppPage from './components/subapps/ReservasFirebase';
 import ReservasFirebaseRealSubAppPage from './components/subapps/ReservasFirebaseReal';
 import ReservasCompleteSubAppPage from './components/subapps/ReservasComplete';
+import ReservasSimples from './components/subapps/ReservasSimples';
 import RecolhasFirebaseSubAppPage from './components/subapps/RecolhasFirebase';
 import RecolhasCompleteSubAppPage from './components/subapps/RecolhasComplete';
+import RecolhasSimples from './components/subapps/RecolhasSimples';
 import FirebaseCollectionExplorer from './components/debug/FirebaseDebug';
+import CamposCompletos from './components/debug/CamposCompletos';
 
 // Importar todos os ícones
 const IconPlaceholder = ({ name, className }) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 12m-9 0a9 9 0 1018 0a9 9 0 10-18 0"></path><text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#fff" fontSize="10">{name.substring(0,1)}</text></svg>;
@@ -426,12 +429,16 @@ export default function AppFirebase() {
             return <FirebaseCollectionExplorer onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
+          if (appId === 'campos-completos') {
+            return <CamposCompletos onNavigateToDashboard={handleNavigateToDashboard} />;
+          }
+          
           if (appId === 'reservas') {
-            return <ReservasCompleteSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <ReservasSimples appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           if (appId === 'recolhas') {
-            return <RecolhasCompleteSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <RecolhasSimples appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           // Para outras sub-aplicações, usar componente genérico Firebase
