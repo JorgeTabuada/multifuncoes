@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useFirebaseAuth } from './components/auth/FirebaseAuth';
 import { FirebaseLoginPage } from './components/auth/FirebaseAuth';
 import ReservasFirebaseSubAppPage from './components/subapps/ReservasFirebase';
+import ReservasFirebaseRealSubAppPage from './components/subapps/ReservasFirebaseReal';
 import RecolhasFirebaseSubAppPage from './components/subapps/RecolhasFirebase';
 import FirebaseCollectionExplorer from './components/debug/FirebaseDebug';
 
@@ -424,7 +425,7 @@ export default function AppFirebase() {
           }
           
           if (appId === 'reservas') {
-            return <ReservasFirebaseSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <ReservasFirebaseRealSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           if (appId === 'recolhas') {

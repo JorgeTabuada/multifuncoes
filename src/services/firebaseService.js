@@ -1,19 +1,7 @@
 // Serviços Firebase para interação com os dados do admin-multipark
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit,
-  onSnapshot 
-} from 'firebase/firestore';
+import { collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { FIREBASE_COLLECTIONS, RESERVAS_FIELDS, ENTREGAS_FIELDS, FirebaseUtils } from '../config/firebaseMapping';
 
 // Serviço genérico para operações CRUD
 export class FirebaseService {
@@ -167,107 +155,171 @@ export class FirebaseService {
 }
 
 // Serviços específicos para as entidades do Multipark
+// Baseado na estrutura real do Firebase admin-multipark
+
 export class MultiparkDataService {
   
-  // Obter reservas (simplificado para evitar índices compostos)
+  // Obter reservas (usando campos reais do Firebase)
   static async getReservas(filters = {}) {
     try {
-      // Usar apenas um filtro por vez para evitar índices compostos
+      console.log('🔍 Buscando reservas com filtros:', filters);
+      
+      // Usar apenas um filtro Firebase por vez para evitar índices compostos
       const filterArray = [];
       
-      // Priorizar filtro por parque se existir
-      if (filters.parque) {
-        filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
-      } else if (filters.estado) {
-        filterArray.push({ field: 'estado', operator: '==', value: filters.estado });
+      // Priorizar filtros na seguinte ordem:
+      if (filters.park) {
+        filterArray.push({ field: RESERVAS_FIELDS.park, operator: '==', value: filters.park });
+      } else if (filters.parkBrand) {
+        filterArray.push({ field: RESERVAS_FIELDS.parkBrand, operator: '==', value: filters.parkBrand });
+      } else if (filters.city) {
+        filterArray.push({ field: RESERVAS_FIELDS.city, operator: '==', value: filters.city });
+      } else if (filters.stats) {
+        filterArray.push({ field: RESERVAS_FIELDS.stats, operator: '==', value: filters.stats });
       }
       
       // Obter dados do Firebase
-      let reservas = await FirebaseService.queryCollection('reservas', filterArray, null, 100);
+      let reservas = await FirebaseService.queryCollection(
+        FIREBASE_COLLECTIONS.RESERVAS, 
+        filterArray, 
+        null, 
+        200 // Aumentar limite para ter mais dados
+      );
+      
+      console.log(`📊 Encontradas ${reservas.length} reservas no Firebase`);
       
       // Aplicar filtros adicionais no cliente (JavaScript)
       if (filters.dataInicio) {
         reservas = reservas.filter(r => {
-          const dataReserva = r.data?.seconds ? new Date(r.data.seconds * 1000) : new Date(r.data);
-          return dataReserva >= filters.dataInicio;
+          const dataReserva = FirebaseUtils.parseFirebaseDate(r[RESERVAS_FIELDS.checkinDate] || r[RESERVAS_FIELDS.bookingDate]);
+          return dataReserva && dataReserva >= filters.dataInicio;
         });
       }
       
       if (filters.dataFim) {
         reservas = reservas.filter(r => {
-          const dataReserva = r.data?.seconds ? new Date(r.data.seconds * 1000) : new Date(r.data);
-          return dataReserva <= filters.dataFim;
+          const dataReserva = FirebaseUtils.parseFirebaseDate(r[RESERVAS_FIELDS.checkoutDate] || r[RESERVAS_FIELDS.checkinDate]);
+          return dataReserva && dataReserva <= filters.dataFim;
         });
       }
       
       if (filters.cliente) {
-        reservas = reservas.filter(r => 
-          r.cliente?.toLowerCase().includes(filters.cliente.toLowerCase())
-        );
+        reservas = reservas.filter(r => {
+          const nomeCompleto = `${r[RESERVAS_FIELDS.name] || ''} ${r[RESERVAS_FIELDS.lastName] || ''}`.toLowerCase();
+          return nomeCompleto.includes(filters.cliente.toLowerCase()) ||
+                 (r[RESERVAS_FIELDS.email] || '').toLowerCase().includes(filters.cliente.toLowerCase());
+        });
       }
       
       if (filters.matricula) {
         reservas = reservas.filter(r => 
-          r.matricula?.toLowerCase().includes(filters.matricula.toLowerCase())
+          (r[RESERVAS_FIELDS.licensePlate] || '').toLowerCase().includes(filters.matricula.toLowerCase())
         );
       }
       
-      if (filters.estado && filters.parque) {
-        reservas = reservas.filter(r => r.estado === filters.estado);
+      if (filters.stats && !filterArray.some(f => f.field === RESERVAS_FIELDS.stats)) {
+        reservas = reservas.filter(r => r[RESERVAS_FIELDS.stats] === filters.stats);
       }
       
-      // Ordenar por data (mais recente primeiro)
+      if (filters.action) {
+        reservas = reservas.filter(r => r[RESERVAS_FIELDS.action] === filters.action);
+      }
+      
+      // Ordenar por data de histórico (mais recente primeiro)
       reservas.sort((a, b) => {
-        const dataA = a.data?.seconds ? new Date(a.data.seconds * 1000) : new Date(a.data);
-        const dataB = b.data?.seconds ? new Date(b.data.seconds * 1000) : new Date(b.data);
+        const dataA = new Date(a[RESERVAS_FIELDS.historyDate] || a[RESERVAS_FIELDS.checkinDate] || 0);
+        const dataB = new Date(b[RESERVAS_FIELDS.historyDate] || b[RESERVAS_FIELDS.checkinDate] || 0);
         return dataB - dataA;
       });
       
+      console.log(`✅ Retornando ${reservas.length} reservas após filtros`);
       return reservas;
     } catch (error) {
-      console.error('Erro ao obter reservas:', error);
+      console.error('❌ Erro ao obter reservas:', error);
       throw error;
     }
   }
 
-  // Obter recolhas (simplificado)
+  // Obter recolhas (filtrar da coleção 'reservas' por action='Movimentação' ou stats='recolhido')
   static async getRecolhas(filters = {}) {
     try {
-      const filterArray = [];
+      console.log('🔍 Buscando recolhas com filtros:', filters);
       
-      if (filters.parque) {
-        filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+      // Primeiro tentar buscar da coleção 'recolhas' (se existir)
+      let recolhas = [];
+      try {
+        recolhas = await FirebaseService.queryCollection(FIREBASE_COLLECTIONS.RECOLHAS, [], null, 50);
+      } catch (err) {
+        console.log('📝 Coleção recolhas vazia, buscando da coleção reservas...');
       }
       
-      let recolhas = await FirebaseService.queryCollection('recolhas', filterArray, null, 100);
+      // Se não há dados em 'recolhas', buscar da coleção 'reservas'
+      if (recolhas.length === 0) {
+        const filterArray = [];
+        
+        // Filtrar por ação de movimentação ou estado recolhido
+        if (filters.park) {
+          filterArray.push({ field: RESERVAS_FIELDS.park, operator: '==', value: filters.park });
+        } else {
+          // Buscar registos com action='Movimentação' ou stats='recolhido'
+          filterArray.push({ field: RESERVAS_FIELDS.action, operator: '==', value: 'Movimentação' });
+        }
+        
+        let reservas = await FirebaseService.queryCollection(FIREBASE_COLLECTIONS.RESERVAS, filterArray, null, 200);
+        
+        // Filtrar apenas recolhas (Movimentação ou recolhido)
+        recolhas = reservas.filter(r => {
+          const action = (r[RESERVAS_FIELDS.action] || '').toLowerCase();
+          const stats = (r[RESERVAS_FIELDS.stats] || '').toLowerCase();
+          return action === 'movimentação' || stats === 'recolhido';
+        });
+      }
       
-      // Aplicar filtros no cliente
+      // Aplicar filtros adicionais no cliente
       if (filters.condutor) {
-        recolhas = recolhas.filter(r => 
-          r.condutor?.toLowerCase().includes(filters.condutor.toLowerCase())
-        );
+        recolhas = recolhas.filter(r => {
+          const user = (r[RESERVAS_FIELDS.user] || '').toLowerCase();
+          return user.includes(filters.condutor.toLowerCase());
+        });
       }
       
       if (filters.matricula) {
         recolhas = recolhas.filter(r => 
-          r.matricula?.toLowerCase().includes(filters.matricula.toLowerCase())
+          (r[RESERVAS_FIELDS.licensePlate] || '').toLowerCase().includes(filters.matricula.toLowerCase())
         );
       }
       
       if (filters.estado) {
-        recolhas = recolhas.filter(r => r.estado === filters.estado);
+        recolhas = recolhas.filter(r => 
+          (r[RESERVAS_FIELDS.stats] || '').toLowerCase() === filters.estado.toLowerCase()
+        );
       }
       
-      // Ordenar por data
+      if (filters.dataInicio) {
+        recolhas = recolhas.filter(r => {
+          const dataRecolha = FirebaseUtils.parseFirebaseDate(r[RESERVAS_FIELDS.checkinDate]);
+          return dataRecolha && dataRecolha >= filters.dataInicio;
+        });
+      }
+      
+      if (filters.dataFim) {
+        recolhas = recolhas.filter(r => {
+          const dataRecolha = FirebaseUtils.parseFirebaseDate(r[RESERVAS_FIELDS.checkinDate]);
+          return dataRecolha && dataRecolha <= filters.dataFim;
+        });
+      }
+      
+      // Ordenar por data de histórico
       recolhas.sort((a, b) => {
-        const dataA = a.data?.seconds ? new Date(a.data.seconds * 1000) : new Date(a.data);
-        const dataB = b.data?.seconds ? new Date(b.data.seconds * 1000) : new Date(b.data);
+        const dataA = new Date(a[RESERVAS_FIELDS.historyDate] || a[RESERVAS_FIELDS.checkinDate] || 0);
+        const dataB = new Date(b[RESERVAS_FIELDS.historyDate] || b[RESERVAS_FIELDS.checkinDate] || 0);
         return dataB - dataA;
       });
       
+      console.log(`✅ Retornando ${recolhas.length} recolhas`);
       return recolhas;
     } catch (error) {
-      console.error('Erro ao obter recolhas:', error);
+      console.error('❌ Erro ao obter recolhas:', error);
       throw error;
     }
   }
