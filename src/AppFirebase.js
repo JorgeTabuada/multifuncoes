@@ -3,7 +3,9 @@ import { useFirebaseAuth } from './components/auth/FirebaseAuth';
 import { FirebaseLoginPage } from './components/auth/FirebaseAuth';
 import ReservasFirebaseSubAppPage from './components/subapps/ReservasFirebase';
 import ReservasFirebaseRealSubAppPage from './components/subapps/ReservasFirebaseReal';
+import ReservasCompleteSubAppPage from './components/subapps/ReservasComplete';
 import RecolhasFirebaseSubAppPage from './components/subapps/RecolhasFirebase';
+import RecolhasCompleteSubAppPage from './components/subapps/RecolhasComplete';
 import FirebaseCollectionExplorer from './components/debug/FirebaseDebug';
 
 // Importar todos os ícones
@@ -425,11 +427,11 @@ export default function AppFirebase() {
           }
           
           if (appId === 'reservas') {
-            return <ReservasFirebaseRealSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <ReservasCompleteSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           if (appId === 'recolhas') {
-            return <RecolhasFirebaseSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <RecolhasCompleteSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           // Para outras sub-aplicações, usar componente genérico Firebase
