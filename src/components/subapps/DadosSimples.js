@@ -21,10 +21,17 @@ const DadosSimples = ({ appName, onNavigateToDashboard }) => {
       
       let dadosFiltrados;
       if (cidade) {
-        // Filtrar por cidade
-        dadosFiltrados = result.filter(item => 
-          item.city && item.city.toLowerCase() === cidade.toLowerCase()
-        );
+        if (cidade === 'reservados') {
+          // Filtrar por stats = 'reservados'
+          dadosFiltrados = result.filter(item => 
+            item.stats && item.stats === 'reservados'
+          );
+        } else {
+          // Filtrar por cidade exata (lisbon, faro, etc.)
+          dadosFiltrados = result.filter(item => 
+            item.city && item.city === cidade
+          );
+        }
       } else {
         dadosFiltrados = result;
       }
@@ -103,17 +110,17 @@ const DadosSimples = ({ appName, onNavigateToDashboard }) => {
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            LISBOA
+            LISBOA (lisbon)
           </button>
           <button 
-            onClick={() => handleCidadeClick('porto')}
+            onClick={() => handleCidadeClick('reservados')}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              cidadeSelecionada === 'porto' 
+              cidadeSelecionada === 'reservados' 
                 ? 'bg-red-600 text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            PORTO
+            RESERVADOS
           </button>
           <button 
             onClick={() => handleCidadeClick('faro')}
