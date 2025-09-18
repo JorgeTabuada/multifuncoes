@@ -3,6 +3,7 @@ import { useFirebaseAuth } from './components/auth/FirebaseAuth';
 import { FirebaseLoginPage } from './components/auth/FirebaseAuth';
 import ReservasFirebaseSubAppPage from './components/subapps/ReservasFirebase';
 import RecolhasFirebaseSubAppPage from './components/subapps/RecolhasFirebase';
+import FirebaseCollectionExplorer from './components/debug/FirebaseDebug';
 
 // Importar todos os ícones
 const IconPlaceholder = ({ name, className }) => <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M12 12m-9 0a9 9 0 1018 0a9 9 0 10-18 0"></path><text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#fff" fontSize="10">{name.substring(0,1)}</text></svg>;
@@ -190,6 +191,12 @@ const FirebaseDashboardPage = ({ onNavigateToApp, selectedPark, setSelectedPark 
         </main>
         
         <div className="logout-button-container">
+          <button 
+            onClick={() => onNavigateToApp('firebase-debug', 'Diagnóstico Firebase')} 
+            className="w-full mb-2 bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded transition-colors"
+          >
+            🔍 Diagnosticar Firebase
+          </button>
           <button id="logoutButton" onClick={handleLogout} className="w-full">
             Sair
           </button>
@@ -412,6 +419,10 @@ export default function AppFirebase() {
           const appId = currentPage.split('/')[1];
           
           // Routing para as sub-aplicações com Firebase
+          if (appId === 'firebase-debug') {
+            return <FirebaseCollectionExplorer onNavigateToDashboard={handleNavigateToDashboard} />;
+          }
+          
           if (appId === 'reservas') {
             return <ReservasFirebaseSubAppPage appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
