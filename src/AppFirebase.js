@@ -8,6 +8,7 @@ import ReservasSimples from './components/subapps/ReservasSimples';
 import RecolhasFirebaseSubAppPage from './components/subapps/RecolhasFirebase';
 import RecolhasCompleteSubAppPage from './components/subapps/RecolhasComplete';
 import RecolhasSimples from './components/subapps/RecolhasSimples';
+import DadosSimples from './components/subapps/DadosSimples';
 import FirebaseCollectionExplorer from './components/debug/FirebaseDebug';
 import CamposCompletos from './components/debug/CamposCompletos';
 
@@ -201,7 +202,7 @@ const FirebaseDashboardPage = ({ onNavigateToApp, selectedPark, setSelectedPark 
             onClick={() => onNavigateToApp('campos-completos', 'Análise Completa de Campos')} 
             className="w-full mb-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors"
           >
-            📊 Ver Todos os Campos
+            📊 Análise Completa
           </button>
           <button 
             onClick={() => onNavigateToApp('firebase-debug', 'Diagnóstico Firebase')} 
@@ -440,11 +441,11 @@ export default function AppFirebase() {
           }
           
           if (appId === 'reservas') {
-            return <ReservasSimples appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <DadosSimples appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           if (appId === 'recolhas') {
-            return <RecolhasSimples appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
+            return <DadosSimples appName={currentAppName} onNavigateToDashboard={handleNavigateToDashboard} />;
           }
           
           // Para outras sub-aplicações, usar componente genérico Firebase
