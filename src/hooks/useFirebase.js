@@ -88,26 +88,26 @@ export const useReservas = (filters = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchReservas = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const reservas = await MultiparkDataService.getReservas(filters);
-        setData(reservas);
-        setLoading(false);
-      } catch (err) {
-        console.error('Erro ao obter reservas:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+  const fetchReservas = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const reservas = await MultiparkDataService.getReservas(filters);
+      setData(reservas);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao obter reservas:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchReservas();
   }, [JSON.stringify(filters)]);
 
-  return { data, loading, error, refetch: () => fetchReservas() };
+  return { data, loading, error, refetch: fetchReservas };
 };
 
 // Hook específico para recolhas
@@ -116,26 +116,26 @@ export const useRecolhas = (filters = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchRecolhas = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const recolhas = await MultiparkDataService.getRecolhas(filters);
-        setData(recolhas);
-        setLoading(false);
-      } catch (err) {
-        console.error('Erro ao obter recolhas:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+  const fetchRecolhas = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const recolhas = await MultiparkDataService.getRecolhas(filters);
+      setData(recolhas);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao obter recolhas:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchRecolhas();
   }, [JSON.stringify(filters)]);
 
-  return { data, loading, error, refetch: () => fetchRecolhas() };
+  return { data, loading, error, refetch: fetchRecolhas };
 };
 
 // Hook específico para entregas
@@ -144,26 +144,26 @@ export const useEntregas = (filters = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchEntregas = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const entregas = await MultiparkDataService.getEntregas(filters);
-        setData(entregas);
-        setLoading(false);
-      } catch (err) {
-        console.error('Erro ao obter entregas:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+  const fetchEntregas = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const entregas = await MultiparkDataService.getEntregas(filters);
+      setData(entregas);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao obter entregas:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchEntregas();
   }, [JSON.stringify(filters)]);
 
-  return { data, loading, error, refetch: () => fetchEntregas() };
+  return { data, loading, error, refetch: fetchEntregas };
 };
 
 // Hook específico para produtividade dos condutores
@@ -172,26 +172,26 @@ export const useProdutividadeCondutores = (filters = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProdutividade = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const produtividade = await MultiparkDataService.getProdutividadeCondutores(filters);
-        setData(produtividade);
-        setLoading(false);
-      } catch (err) {
-        console.error('Erro ao obter produtividade:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+  const fetchProdutividade = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const produtividade = await MultiparkDataService.getProdutividadeCondutores(filters);
+      setData(produtividade);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao obter produtividade:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProdutividade();
   }, [JSON.stringify(filters)]);
 
-  return { data, loading, error, refetch: () => fetchProdutividade() };
+  return { data, loading, error, refetch: fetchProdutividade };
 };
 
 // Hook específico para comentários e reclamações
@@ -200,26 +200,26 @@ export const useComentariosReclamacoes = (filters = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchComentarios = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const comentarios = await MultiparkDataService.getComentariosReclamacoes(filters);
-        setData(comentarios);
-        setLoading(false);
-      } catch (err) {
-        console.error('Erro ao obter comentários:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+  const fetchComentarios = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const comentarios = await MultiparkDataService.getComentariosReclamacoes(filters);
+      setData(comentarios);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erro ao obter comentários:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchComentarios();
   }, [JSON.stringify(filters)]);
 
-  return { data, loading, error, refetch: () => fetchComentarios() };
+  return { data, loading, error, refetch: fetchComentarios };
 };
 
 // Hook para operações CRUD genéricas
