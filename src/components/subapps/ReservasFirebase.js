@@ -180,18 +180,57 @@ const ReservasFirebaseSubAppPage = ({ appName, onNavigateToDashboard }) => {
         ) : error ? (
           <div className="content-placeholder">
             <div className="text-red-500 mb-4">
-              <p>Erro ao carregar dados: {error}</p>
+              <p className="font-semibold">Erro ao carregar dados:</p>
+              <p className="text-sm">{error}</p>
             </div>
-            <button onClick={refetch} className="action-button">
-              Tentar Novamente
-            </button>
+            
+            {error.includes('index') && (
+              <div className="bg-yellow-50 p-4 rounded-lg text-left mb-4">
+                <h4 className="font-semibold mb-2">🔧 Solução para Índices:</h4>
+                <p className="text-sm mb-2">
+                  O Firebase precisa de índices para consultas complexas. 
+                  Isto é normal e pode ser resolvido:
+                </p>
+                <ol className="list-decimal list-inside text-sm space-y-1">
+                  <li>Usar filtros mais simples (um de cada vez)</li>
+                  <li>Criar índices no Firebase Console (link no erro)</li>
+                  <li>Aguardar alguns minutos após criar os índices</li>
+                </ol>
+              </div>
+            )}
+            
+            <div className="flex gap-2">
+              <button onClick={refetch} className="action-button">
+                Tentar Novamente
+              </button>
+              <button onClick={handleClearFilters} className="action-button secondary">
+                Limpar Filtros
+              </button>
+            </div>
           </div>
         ) : reservas.length === 0 ? (
           <div className="content-placeholder">
-            <p>Nenhuma reserva encontrada com os filtros aplicados.</p>
-            <button onClick={handleClearFilters} className="action-button mt-4">
-              Limpar Filtros
-            </button>
+            <div className="text-center">
+              <p className="mb-4">Nenhuma reserva encontrada com os filtros aplicados.</p>
+              
+              <div className="bg-blue-50 p-4 rounded-lg text-left mb-4">
+                <h4 className="font-semibold mb-2">💡 Sugestões:</h4>
+                <ul className="list-disc list-inside text-sm space-y-1">
+                  <li>Verificar se existem dados na coleção 'reservas'</li>
+                  <li>Tentar com filtros diferentes ou mais amplos</li>
+                  <li>Limpar todos os filtros para ver todos os dados</li>
+                </ul>
+              </div>
+              
+              <div className="flex gap-2 justify-center">
+                <button onClick={handleClearFilters} className="action-button">
+                  Limpar Filtros
+                </button>
+                <button onClick={() => window.location.reload()} className="action-button secondary">
+                  Recarregar Página
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="table-container">

@@ -169,42 +169,149 @@ export class FirebaseService {
 // Serviços específicos para as entidades do Multipark
 export class MultiparkDataService {
   
-  // Obter reservas
+  // Obter reservas (simplificado para evitar índices compostos)
   static async getReservas(filters = {}) {
-    const filterArray = [];
-    
-    if (filters.parque) {
-      filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+    try {
+      // Usar apenas um filtro por vez para evitar índices compostos
+      const filterArray = [];
+      
+      // Priorizar filtro por parque se existir
+      if (filters.parque) {
+        filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+      } else if (filters.estado) {
+        filterArray.push({ field: 'estado', operator: '==', value: filters.estado });
+      }
+      
+      // Obter dados do Firebase
+      let reservas = await FirebaseService.queryCollection('reservas', filterArray, null, 100);
+      
+      // Aplicar filtros adicionais no cliente (JavaScript)
+      if (filters.dataInicio) {
+        reservas = reservas.filter(r => {
+          const dataReserva = r.data?.seconds ? new Date(r.data.seconds * 1000) : new Date(r.data);
+          return dataReserva >= filters.dataInicio;
+        });
+      }
+      
+      if (filters.dataFim) {
+        reservas = reservas.filter(r => {
+          const dataReserva = r.data?.seconds ? new Date(r.data.seconds * 1000) : new Date(r.data);
+          return dataReserva <= filters.dataFim;
+        });
+      }
+      
+      if (filters.cliente) {
+        reservas = reservas.filter(r => 
+          r.cliente?.toLowerCase().includes(filters.cliente.toLowerCase())
+        );
+      }
+      
+      if (filters.matricula) {
+        reservas = reservas.filter(r => 
+          r.matricula?.toLowerCase().includes(filters.matricula.toLowerCase())
+        );
+      }
+      
+      if (filters.estado && filters.parque) {
+        reservas = reservas.filter(r => r.estado === filters.estado);
+      }
+      
+      // Ordenar por data (mais recente primeiro)
+      reservas.sort((a, b) => {
+        const dataA = a.data?.seconds ? new Date(a.data.seconds * 1000) : new Date(a.data);
+        const dataB = b.data?.seconds ? new Date(b.data.seconds * 1000) : new Date(b.data);
+        return dataB - dataA;
+      });
+      
+      return reservas;
+    } catch (error) {
+      console.error('Erro ao obter reservas:', error);
+      throw error;
     }
-    
-    if (filters.dataInicio && filters.dataFim) {
-      filterArray.push({ field: 'data', operator: '>=', value: filters.dataInicio });
-      filterArray.push({ field: 'data', operator: '<=', value: filters.dataFim });
-    }
-    
-    return await FirebaseService.queryCollection('reservas', filterArray, 'data');
   }
 
-  // Obter recolhas
+  // Obter recolhas (simplificado)
   static async getRecolhas(filters = {}) {
-    const filterArray = [];
-    
-    if (filters.parque) {
-      filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+    try {
+      const filterArray = [];
+      
+      if (filters.parque) {
+        filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+      }
+      
+      let recolhas = await FirebaseService.queryCollection('recolhas', filterArray, null, 100);
+      
+      // Aplicar filtros no cliente
+      if (filters.condutor) {
+        recolhas = recolhas.filter(r => 
+          r.condutor?.toLowerCase().includes(filters.condutor.toLowerCase())
+        );
+      }
+      
+      if (filters.matricula) {
+        recolhas = recolhas.filter(r => 
+          r.matricula?.toLowerCase().includes(filters.matricula.toLowerCase())
+        );
+      }
+      
+      if (filters.estado) {
+        recolhas = recolhas.filter(r => r.estado === filters.estado);
+      }
+      
+      // Ordenar por data
+      recolhas.sort((a, b) => {
+        const dataA = a.data?.seconds ? new Date(a.data.seconds * 1000) : new Date(a.data);
+        const dataB = b.data?.seconds ? new Date(b.data.seconds * 1000) : new Date(b.data);
+        return dataB - dataA;
+      });
+      
+      return recolhas;
+    } catch (error) {
+      console.error('Erro ao obter recolhas:', error);
+      throw error;
     }
-    
-    return await FirebaseService.queryCollection('recolhas', filterArray, 'data');
   }
 
-  // Obter entregas
+  // Obter entregas (simplificado)
   static async getEntregas(filters = {}) {
-    const filterArray = [];
-    
-    if (filters.parque) {
-      filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+    try {
+      const filterArray = [];
+      
+      if (filters.parque) {
+        filterArray.push({ field: 'parque', operator: '==', value: filters.parque });
+      }
+      
+      let entregas = await FirebaseService.queryCollection('entregas', filterArray, null, 100);
+      
+      // Aplicar filtros no cliente
+      if (filters.condutor) {
+        entregas = entregas.filter(e => 
+          e.condutor?.toLowerCase().includes(filters.condutor.toLowerCase())
+        );
+      }
+      
+      if (filters.cliente) {
+        entregas = entregas.filter(e => 
+          e.cliente?.toLowerCase().includes(filters.cliente.toLowerCase())
+        );
+      }
+      
+      if (filters.estado) {
+        entregas = entregas.filter(e => e.estado === filters.estado);
+      }
+      
+      // Ordenar por data
+      entregas.sort((a, b) => {
+        const dataA = a.data?.seconds ? new Date(a.data.seconds * 1000) : new Date(a.data);
+        const dataB = b.data?.seconds ? new Date(b.data.seconds * 1000) : new Date(b.data);
+        return dataB - dataA;
+      });
+      
+      return entregas;
+    } catch (error) {
+      console.error('Erro ao obter entregas:', error);
+      throw error;
     }
-    
-    return await FirebaseService.queryCollection('entregas', filterArray, 'data');
   }
 
   // Obter dados de produtividade dos condutores
