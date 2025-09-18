@@ -198,6 +198,12 @@ const FirebaseDashboardPage = ({ onNavigateToApp, selectedPark, setSelectedPark 
         
         <div className="logout-button-container">
           <button 
+            onClick={() => onNavigateToApp('campos-completos', 'Análise Completa de Campos')} 
+            className="w-full mb-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors"
+          >
+            📊 Ver Todos os Campos
+          </button>
+          <button 
             onClick={() => onNavigateToApp('firebase-debug', 'Diagnóstico Firebase')} 
             className="w-full mb-2 bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded transition-colors"
           >
